@@ -3,7 +3,7 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 }
 `
-const fshader = `
+const fshader_time = `
 uniform vec3 u_color_a;
 uniform vec3 u_color_b;
 uniform vec2 u_mouse;
@@ -18,8 +18,39 @@ void main (void)
 }
 `
 
+const fshader_mouse = `
+uniform vec3 u_color;
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_time;
 
+void main (void)
+{
+  vec3 color = vec3(u_mouse.x/u_resolution.x, 0.0, u_mouse.y/u_resolution.y);
+  //color = vec3((sin(u_time)+1.0)/2.0, 0.0, (cos(u_time)+1.0)/2.0);
+  gl_FragColor = vec4(color, 1.0); 
+}
+`
+const fshader_hsb = `
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_time;
 
+//  Function from I?igo Quiles
+//  https://www.shadertoy.com/view/MsS3Wc
+vec3 hsb2rgb( vec3 c ){
+  vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0), 6.0)-3.0)-1.0, 0.0, 1.0 );
+  rgb = rgb*rgb*(3.0-2.0*rgb);
+  return c.z * mix(vec3(1.0), rgb, c.y);
+}
+
+void main (void)
+{
+  vec2 uv = gl_FragCoord.xy/u_resolution;
+  vec3 color = hsb2rgb(vec3(uv.x,1.0,uv.y));
+  gl_FragColor = vec4(color, 1.0); 
+}
+`
 
 
 
@@ -44,7 +75,7 @@ const uniforms = {
 const material = new THREE.ShaderMaterial( {
   uniforms: uniforms,
   vertexShader: vshader,
-  fragmentShader: fshader
+  fragmentShader: fshader_hsb
 } );
 
 const plane = new THREE.Mesh( geometry, material );
