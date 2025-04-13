@@ -101,6 +101,8 @@ void main (void)
 
 
 
+
+
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0.1, 10 );
 
@@ -112,8 +114,7 @@ const clock = new THREE.Clock();
 
 const geometry = new THREE.PlaneGeometry( 2, 2 );
 const uniforms = {
-  u_color_a: { value: new THREE.Color(0xff0000) },
-  u_color_b: { value: new THREE.Color(0x00ffff) },
+  u_color: { value: new THREE.Color(0xffff00) },
   u_time: { value: 0.0 },
   u_mouse: { value:{ x:0.0, y:0.0 }},
   u_resolution: { value:{ x:0, y:0 }}
