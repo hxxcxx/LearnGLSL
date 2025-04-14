@@ -1,3 +1,4 @@
+
 const vshader = `
 varying vec2 vUv;
 varying vec3 vPosition;
@@ -29,6 +30,35 @@ void main (void)
   gl_FragColor = vec4(color, 1.0); 
 }
 `
+const fshader_sin = `
+#define PI2 6.28318530718
+
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform vec3 u_color;
+
+varying vec2 vUv;
+varying vec3 vPosition;
+
+float getDelta(float x){
+  return (sin(x)+1.0)/2.0;
+}
+
+float line(float x, float y, float line_width, float edge_width){
+  return smoothstep(x-line_width/2.0-edge_width, x-line_width/2.0, y) - smoothstep(x+line_width/2.0, x+line_width/2.0+edge_width, y);
+}
+
+void main (void)
+{
+  vec3 color = u_color * line(vUv.y, mix(0.2, 0.8, getDelta(vPosition.x*PI2)), 0.005, 0.002);
+  color += line(vUv.x, 0.5, 0.002, 0.001)*vec3(0.5);
+  color += line(vUv.y, 0.5, 0.002, 0.001)*vec3(0.5);
+
+  gl_FragColor = vec4(color, 1.0); 
+}
+`
+
 
 const uniforms = {
   u_color: { value: new THREE.Color(0xffff00) },
@@ -38,4 +68,5 @@ const uniforms = {
 }
 
 
-const shaderScene = new ShaderScene(vshader, fshader1, uniforms);
+
+const shaderScene = new ShaderScene(vshader, fshader_sin, uniforms);

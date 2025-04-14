@@ -35,9 +35,25 @@ class ShaderScene {
     } else {
       window.addEventListener('resize', this.onWindowResize.bind(this), false);
       document.addEventListener('mousemove', this.move.bind(this));
+      document.addEventListener('wheel',this.onMouseWheel.bind(this), false);
+
     }
   }
 
+  onMouseWheel(event) {
+    const zoomFactor = 0.1; // 缩放因子
+    const delta = event.deltaY > 0 ? 1 : -1; // 判断滚轮方向
+  
+    // 调整相机的视图范围
+    this.camera.left *= (1 + delta * zoomFactor);
+    this.camera.right *= (1 + delta * zoomFactor);
+    this.camera.top *= (1 + delta * zoomFactor);
+    this.camera.bottom *= (1 + delta * zoomFactor);
+  
+    // 更新相机的投影矩阵
+    this.camera.updateProjectionMatrix();
+  }
+  
   move(evt) {
     this.uniforms.u_mouse.value.x = evt.touches ? evt.touches[0].clientX : evt.clientX;
     this.uniforms.u_mouse.value.y = evt.touches ? evt.touches[0].clientY : evt.clientY;
