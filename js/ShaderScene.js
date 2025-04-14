@@ -11,6 +11,8 @@ class ShaderScene {
       uniforms: this.uniforms,
       vertexShader: vshader,
       fragmentShader: fshader,
+      transparent: true
+
     });
 
     this.plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material);
