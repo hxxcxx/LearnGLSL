@@ -171,15 +171,121 @@ void main (void)
   gl_FragColor = color;
 }
 `
+const vshader_texture2D = `
+varying vec2 vUv;
+void main() {	
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}
+`
+const fshader_texture2D = `
+#define PI 3.141592653589
+#define PI2 6.28318530718
 
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform sampler2D u_tex;
 
+varying vec2 vUv;
 
+vec2 rotate(vec2 pt, float theta){
+  float c = cos(theta);
+  float s = sin(theta);
+  mat2 mat = mat2(c,s,-s,c);
+  return mat * pt;
+}
+
+void main (void)
+{
+  vec2 uv = vUv;
+  vec3 color = texture2D(u_tex, uv).rgb;
+  gl_FragColor = vec4(color, 1.0); 
+}
+`
+const fshader_rotate = `
+#define PI 3.141592653589
+#define PI2 6.28318530718
+
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform sampler2D u_tex;
+
+varying vec2 vUv;
+
+vec2 rotate(vec2 pt, float theta){
+  float c = cos(theta);
+  float s = sin(theta);
+  float aspect = 2.0/1.5;
+  mat2 mat = mat2(c,s,-s,c);
+  pt.y /= aspect;
+  pt = mat * pt;
+  pt.y *= aspect;
+  return pt;
+}
+
+void main (void)
+{
+  vec2 uv = vUv;
+  uv -= vec2(0.5);
+  uv = rotate(uv, u_time);
+  uv += vec2(0.5);
+  vec3 color;
+  if (uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0){
+    color = vec3(0.0);
+  }else{
+    color = texture2D(u_tex, uv).rgb;
+  }
+  gl_FragColor = vec4(color, 1.0); 
+}
+`
+const fshader_ripple = `
+#define PI 3.141592653589
+#define PI2 6.28318530718
+
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform float u_duration;
+uniform sampler2D u_tex;
+
+varying vec2 vUv;
+
+void main (void)
+{
+  vec2 p = vUv*2.0 - 1.0;
+  float len = length(p);
+  vec2 ripple = vUv + p/len*0.03*cos(len*12.0-u_time*4.0);
+  float delta = (((sin(u_time)+1.0)/2.0)* u_duration)/u_duration;
+  vec2 uv = mix(ripple, vUv, delta);
+  vec3 color = texture2D(u_tex, uv).rgb;
+  gl_FragColor = vec4(color, 1.0); 
+}
+`
+
+// const uniforms = {
+//   u_tex: { value: new THREE.TextureLoader().load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/2666677/flame.png") },
+//   u_time: { value: 0.0 },
+//   u_mouse: { value:{ x:0.0, y:0.0 }},
+//   u_resolution: { value:{ x:0, y:0 }}
+// }
+// const uniforms = {
+//   u_tex: { value: new THREE.TextureLoader().load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/2666677/sa1.jpg") },
+//   u_time: { value: 0.0 },
+//   u_mouse: { value:{ x:0.0, y:0.0 }},
+//   u_resolution: { value:{ x:0, y:0 }}
+// }
+
+//ÖÐÐÄÁ°äô
 const uniforms = {
-  u_tex: { value: new THREE.TextureLoader().load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/2666677/flame.png") },
+  u_tex: { value: new THREE.TextureLoader().load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/2666677/sa1.jpg") },
+  u_duration: { value: 2.0 },
   u_time: { value: 0.0 },
   u_mouse: { value:{ x:0.0, y:0.0 }},
   u_resolution: { value:{ x:0, y:0 }}
 }
 
 
-const shaderScene = new ShaderScene(vshader1, fshader_noise_time, uniforms);
+
+const shaderScene = new ShaderScene(vshader_texture2D, fshader_ripple, uniforms);
